@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Classic Snake Game</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body {
+      background: #222 url('game-bg.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    #scorebar {
+      width: 600px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      font-size: 22px;
+      color: #fff;
+      background: rgba(34,34,34,0.85);
+      margin: 24px auto 8px auto;
+      padding: 0 24px;
+      box-sizing: border-box;
+      height: 40px;
+      border-radius: 6px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      gap: 48px;
+    }
+    #main-layout {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      width: auto;
+      height: auto;
+      box-sizing: border-box;
+      gap: 32px;
+      margin-top: 64px;
+      margin-bottom: 32px;
+    }
+    #hints {
+      color: white;
+      font-family: Arial, sans-serif;
+      background: rgba(24, 24, 24, 0.85);
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 18px 18px 18px 18px;
+      min-width: 260px;
+      max-width: 420px;
+      margin: 0;
+      font-size: 16px;
+      box-sizing: border-box;
+      height: 600px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #onscreen-controls {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+    .control-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+    .control-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #333;
+      border: 2px solid #888;
+      margin: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 0 rgba(255,255,255,0);
+      padding: 0;
+    }
+    .control-btn:active,
+    .control-btn:focus {
+      background: #555;
+      box-shadow: 0 0 16px 4px #fff, 0 0 8px 2px #00eaff;
+      outline: none;
+    }
+    .control-btn:hover {
+      box-shadow: 0 0 12px 2px #00eaff;
+      background: #444;
+    }
+    .control-btn.up::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 18px solid #fff;
+      margin: 0 auto;
+    }
+    .control-btn.down::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 18px solid #fff;
+      margin: 0 auto;
+    }
+    .control-btn.left::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-right: 18px solid #fff;
+      margin: 0 auto;
+    }
+    .control-btn.right::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-left: 18px solid #fff;
+      margin: 0 auto;
+    }
+    .control-btn.pause {
+      position: relative;
+      background: #333;
+      border: 2px solid #888;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 0 rgba(255,255,255,0);
+      padding: 0;
+      margin: 0 12px;
+    }
+    .control-btn.pause:active,
+    .control-btn.pause:focus {
+      background: #555;
+      box-shadow: 0 0 16px 4px #fff, 0 0 8px 2px #00eaff;
+      outline: none;
+    }
+    .control-btn.pause:hover {
+      box-shadow: 0 0 12px 2px #00eaff;
+      background: #444;
+    }
+    .pause-bars {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 32px;
+      margin: 0 auto;
+    }
+    .pause-bars::before,
+    .pause-bars::after {
+      content: '';
+      display: block;
+      width: 7px;
+      height: 28px;
+      background: #fff;
+      border-radius: 2px;
+      margin: 0 3px;
+    }
+    #highscores-container {
+      background: rgba(24, 24, 24, 0.85);
+      width: 380px;
+      max-width: 420px;
+      height: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      padding: 18px 18px 18px 18px;
+      box-sizing: border-box;
+      margin: 0;
+    }
+    #game-container {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    canvas {
+      background: rgba(17, 17, 17, 0.72);
+      border: 2px solid #fff;
+      display: block;
+    }
+    #bonus-timer-bar {
+      height: 100%;
+      width: 0;
+      background: gold;
+      transition: width 0.1s;
+      visibility: hidden;
+      border-radius: 5px;
+    }
+    @media (max-width: 1200px) {
+      #main-layout {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      #hints, #highscores-container {
+        width: 95vw;
+        max-width: 95vw;
+        height: 200px;
+        max-height: 200px;
+      }
+      #game-container, #scorebar {
+        width: 95vw;
+        max-width: 95vw;
+      }
+      canvas {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        height: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="scorebar">
+    <span id="score-label">Score: 0</span>
+    <span id="level-label">Level: 1</span>
+    <span id="lives-label">Lives: 4</span>
+  </div>
+  <div id="main-layout">
+    <div id="hints">
+      <div id="hints-content"></div>
+      <div id="onscreen-controls">
+        <div class="control-row">
+          <button class="control-btn up" id="btn-up" aria-label="Up"></button>
+        </div>
+        <div class="control-row">
+          <button class="control-btn left" id="btn-left" aria-label="Left"></button>
+          <button class="control-btn pause" id="btn-pause" aria-label="Pause">
+            <span class="pause-bars"></span>
+          </button>
+          <button class="control-btn right" id="btn-right" aria-label="Right"></button>
+        </div>
+        <div class="control-row">
+          <button class="control-btn down" id="btn-down" aria-label="Down"></button>
+        </div>
+      </div>
+    </div>
+    <div id="game-container">
+      <canvas id="game" width="600" height="600"></canvas>
+      <div style="width:600px; height:10px; margin:8px auto 0 auto; background:#333; border-radius:5px; overflow:hidden;">
+        <div id="bonus-timer-bar"></div>
+      </div>
+    </div>
+    <div id="highscores-container">
+      <div style="text-align:center; font-weight:bold; font-size:18px; margin-bottom:8px;">High Scores</div>
+      <ol id="highscores" style="margin: 8px 0 0 20px; padding: 0;"></ol>
+    </div>
+  </div>
+  <script src="snake.js"></script>
+  <script>
+    // Make sure these variables are available globally for onscreen controls
+    window.grid = 20;
+    window.dx = window.dx || window.grid;
+    window.dy = window.dy || 0;
+    window.isPaused = false;
+    
+    // Pause and direction on screen arrows handled in snake.js
+  </script>
+</body>
+</html>
